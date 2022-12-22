@@ -9,10 +9,8 @@ import java.net.Socket;
 class Session extends Thread {
     private final Socket socket;
 
-    public boolean isEnd() {
-        return isEnd;
-    }
-    private boolean isEnd=false;
+
+    private boolean isEnd;
 
     public Session(Socket socketForClient) {
         this.socket = socketForClient;
@@ -68,11 +66,11 @@ class Session extends Thread {
                         }
                         break;
                     case "exit":
-                        this.isEnd = true;
-                        System.out.println("SRV exit");
-//                        socket.close();
-                        break;
+                        Main.setIsEnd(true);
+//                        System.out.println("SRV exit");
+                        socket.close();
 //                        System.exit(0);
+                        break;
                 }
 //            System.out.println("Received: " + msg);
 //
@@ -84,5 +82,9 @@ class Session extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public boolean isEnd() {
+        System.out.println("IEnd: "+isEnd );
+        return isEnd;
     }
 }
