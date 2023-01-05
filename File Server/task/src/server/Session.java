@@ -5,36 +5,52 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 class Session extends Thread {
     private final Socket socket;
 
+    public AtomicBoolean getRunning() {
+        return running;
+    }
 
-    private boolean isEnd;
+    private final AtomicBoolean running = new AtomicBoolean(true);
 
     public Session(Socket socketForClient) {
         this.socket = socketForClient;
+//        this.isEnd = isEnd;
     }
 
+//    @Override
+//    public void interrupt() {
+//        running.set(false);
+//    }
+
     public void run() {
+
+
         try (
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream())
         ) {
 
+//            running.set(true);
 
-            String msg = input.readUTF();
+//            isEnd.set(false);
+            String msg=input.readUTF();
+
 //            System.out.println("COMM: " + msg);
 
                 File file;
-                switch (msg){
+                switch (msg) {
                     case "PUT":
                         //Create file
                         String fileName = input.readUTF();
                         String fileContent = input.readUTF();
-                        if(FileManager.createFile(fileName,fileContent)){
+                        if (FileManager.createFile(fileName, fileContent)) {
                             output.writeUTF("200");
-                        }else{
+                        } else {
                             output.writeUTF("403");
                         }
 
@@ -44,11 +60,11 @@ class Session extends Thread {
                         fileName = input.readUTF();
                         file = new File(fileName);
 
-                        if(FileManager.fileExists(fileName)){
+                        if (FileManager.fileExists(fileName)) {
 //                            System.out.println("File exists: " + file.getName());
                             output.writeUTF("200");
                             output.writeUTF(FileManager.readFile(fileName));
-                        }else {
+                        } else {
                             output.writeUTF("404");
 
                         }
@@ -58,33 +74,36 @@ class Session extends Thread {
                     case "DELETE":
                         //DELETE file
                         fileName = input.readUTF();
-                        if(FileManager.fileExists(fileName)){
+                        if (FileManager.fileExists(fileName)) {
                             output.writeUTF("200");
                             FileManager.deleteFile(fileName);
-                        }else{
+                        } else {
                             output.writeUTF("404");
                         }
                         break;
                     case "exit":
-                        Main.setIsEnd(true);
-//                        System.out.println("SRV exit");
-                        socket.close();
-//                        System.exit(0);
+//
+////                        System.out.println("SRV exit");
+                        running.set(false);
+////                        socket.close();
+////                        interrupt();
+////                        stop();
+////                        System.exit(0);
                         break;
-                }
+
+//                msg=input.readUTF();
 //            System.out.println("Received: " + msg);
 //
 //            String response="All files were sent!";
 //            output.writeUTF(response);
 //            System.out.println("Sent: " + response);
+            }
             socket.close();
 //            System.out.println("itt "+isEnd);
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+
         }
-    }
-    public boolean isEnd() {
-        System.out.println("IEnd: "+isEnd );
-        return isEnd;
-    }
+
 }
