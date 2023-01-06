@@ -14,8 +14,7 @@ public class Main {
     static String responseTemplate="The response says that ";
     static String userInput="";
     static String message="";
-//    static DataInputStream input;
-//    static DataOutputStream output;
+
     public static void main(String[] args) {
 
         String address = "127.0.0.1";
@@ -62,6 +61,8 @@ public class Main {
 
                     if ("200".equals(httpCode)) {
                         System.out.println(responseTemplate+"file was created!");
+                    } else if ("403".equals(httpCode)) {
+                        System.out.println(responseTemplate+"creating the file was forbidden!");
                     }
                     break;
                 case "3":
@@ -85,20 +86,11 @@ public class Main {
                     break;
             }
 
-//            String userInputFileBody = Asker.userInput(actionTemplate);
-//            String sentMessage="Give me everything you have!";
-
-
-
-
         }catch (IOException e){
             System.out.println(e.getMessage());
         }
     }
 
-    private static void deleteFile() {
-
-    }
 
     private static String[] createFile() {
         String fileName = Asker.userInput("Enter filename:");
@@ -117,12 +109,7 @@ public class Main {
 
     private static String[] printFile() {
         String fileName = Asker.userInput("Enter filename:");
-
         String[] result = {"GET", fileName};
-
-//        if("200".equals(message)){
-//            System.out.printf("The content of the file is: %s",message);
-//        }
         return result;
     }
 }

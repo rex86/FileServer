@@ -1,31 +1,16 @@
 package server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 class Session extends Thread {
     private final Socket socket;
+    private final Closeable server;
 
-    public AtomicBoolean getRunning() {
-        return running;
-    }
-
-    private final AtomicBoolean running = new AtomicBoolean(true);
-
-    public Session(Socket socketForClient) {
+    public Session(Closeable server, Socket socketForClient) {
+        this.server = server;
         this.socket = socketForClient;
-//        this.isEnd = isEnd;
     }
-
-//    @Override
-//    public void interrupt() {
-//        running.set(false);
-//    }
 
     public void run() {
 
@@ -34,13 +19,7 @@ class Session extends Thread {
                 DataInputStream input = new DataInputStream(socket.getInputStream());
                 DataOutputStream output = new DataOutputStream(socket.getOutputStream())
         ) {
-
-//            running.set(true);
-
-//            isEnd.set(false);
             String msg=input.readUTF();
-
-//            System.out.println("COMM: " + msg);
 
                 File file;
                 switch (msg) {
@@ -69,7 +48,6 @@ class Session extends Thread {
 
                         }
 
-                        //GET file
                         break;
                     case "DELETE":
                         //DELETE file
@@ -82,24 +60,11 @@ class Session extends Thread {
                         }
                         break;
                     case "exit":
-//
-////                        System.out.println("SRV exit");
-                        running.set(false);
-////                        socket.close();
-////                        interrupt();
-////                        stop();
-////                        System.exit(0);
+                        server.close();
                         break;
 
-//                msg=input.readUTF();
-//            System.out.println("Received: " + msg);
-//
-//            String response="All files were sent!";
-//            output.writeUTF(response);
-//            System.out.println("Sent: " + response);
             }
             socket.close();
-//            System.out.println("itt "+isEnd);
             } catch(IOException e){
                 e.printStackTrace();
             }
